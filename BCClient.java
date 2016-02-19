@@ -81,7 +81,7 @@ public class BCClient{
                 da.num_lines = 3;
                 String xml = xstream.toXML(da);
                 if (userData.indexOf("quit") < 0){
-                    //	  sendToBC(xml, serverName); //uncomment later
+                    sendToBC(xml, serverName); //uncomment later
                     
                     System.out.println("\n\nHere is the XML version:");
                     System.out.print(xml);

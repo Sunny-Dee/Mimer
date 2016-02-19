@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.*;
 import java.io.*;
 import java.util.*;
+import com.thoughtworks.xstream.XStream;
 
 
 /**
@@ -33,9 +34,13 @@ import java.util.*;
 public class MyWebServer {
     public static void main(String args[]) throws IOException{
         int q_len = 6;
-        //port speficied for this assignment
+        //port specified for this assignment
         int port = 2540;
         Socket sock;
+        
+        BCLooper AL = new BCLooper(); // create a DIFFERENT thread for Back Door Channel
+        Thread t = new Thread(AL);
+        t.start();  // ...and start it, waiting for Back Channel input
         
         /*This guy is going to start the connection to the port
          * then it will pass on the request to the worker
@@ -175,7 +180,7 @@ class WebWorker extends Thread {
         "Content-Type: " +
         guessContentType(".xyz") +
         "\r\n" +
-//        "Content-Enconding: Deflate \r\n" +
+        //					"Content-Enconding: Deflate \r\n" +
         "Date: " + new Date() + "\r\n\r\n";
         
         System.out.println(header);
@@ -412,27 +417,27 @@ class AddNums {
     }
     
     /**
-     * Formats the user's inputs as an HTML response. 
-     * @return a string with HTML formatting showing the response 
-     * to the user's request. Meant to be displayed in a browser. 
+     * Formats the user's inputs as an HTML response.
+     * @return a string with HTML formatting showing the response
+     * to the user's request. Meant to be displayed in a browser.
      */
     public String generateResponse(){
         parse();
         String title = "<html><head><TITLE> "
         + "Response for AddNum request</TITLE></head>"
         + "<BODY style=\"background-color:lightgrey;\"><center> "
-        + "<H1 style=\"font-family:verdana;\">Response for " 
+        + "<H1 style=\"font-family:verdana;\">Response for "
         + valuePairs.get("person") + "'s AddNum Request</H1>"
         + "<H2 style=\"font-family:verdana;\">Here are the numbers you wanted to add: </H2>";
         
         
         String data = "<H3>" + valuePairs.get("num1") + " and "
-        + valuePairs.get("num2") 
-        + "<H2> Answer: " + addNums() + "</H2>"; 
+        + valuePairs.get("num2")
+        + "<H2> Answer: " + addNums() + "</H2>";
         
-        String closingTags = "</center></BODY></html>";	
+        String closingTags = "</center></BODY></html>";
         
-        StringBuilder htmlPage = new StringBuilder(); 
+        StringBuilder htmlPage = new StringBuilder();
         
         htmlPage.append(title);
         htmlPage.append(data);
@@ -444,13 +449,13 @@ class AddNums {
     
     /* ********************************
      *      Helper Methods
-     * ********************************     
+     * ********************************
      */
     
     /**
-     * Parses through the string containing the numbers and 
+     * Parses through the string containing the numbers and
      * adds them up
-     * @return the addition of the two values. 
+     * @return the addition of the two values.
      */
     private int addNums(){
         
@@ -461,9 +466,9 @@ class AddNums {
     }
     
     /**
-     * Parses through the name-value pairs in the request and 
-     * updates the valuePairs table, which is used to generate the 
-     * response formatted for HTML. 
+     * Parses through the name-value pairs in the request and
+     * updates the valuePairs table, which is used to generate the
+     * response formatted for HTML.
      */
     private void parse(){
         //throw out everything before '?' to get just the parameters
@@ -476,6 +481,73 @@ class AddNums {
         
     }
     
+}
+
+class MyDataArr {
+    int num_lines = 0;
+    String[] lines = new String[10];
+}  
+
+class BCWorker extends Thread {
+    private Socket sock;
+    private int i;
+    BCWorker (Socket s){sock = s;}
+    PrintStream out = null; BufferedReader in = null;
+    
+    String[] xmlLines = new String[15];
+    String[] testLines = new String[10];
+    String xml;
+    String temp;
+    XStream xstream = new XStream();
+    final String newLine = System.getProperty("line.separator");
+    MyDataArr da = new MyDataArr();
+    
+    public void run(){
+        System.out.println("Called BC worker.");
+        try{
+            in =  new BufferedReader(new InputStreamReader(sock.getInputStream()));
+            out = new PrintStream(sock.getOutputStream()); // to send ack back to client
+            i = 0; xml = "";
+            while(true){
+                temp = in.readLine();
+                if (temp.indexOf("end_of_xml") > -1) break;
+                else xml = xml + temp + newLine; // Should use StringBuilder in 1.5
+            }
+            System.out.println("The XML marshaled data:");
+            System.out.println(xml);
+            out.println("Acknowledging Back Channel Data Receipt"); // send the ack
+            out.flush(); sock.close();
+            
+            da = (MyDataArr) xstream.fromXML(xml); // deserialize / unmarshal data
+            System.out.println("Here is the restored data: ");
+            for(i = 0; i < da.num_lines; i++){
+                System.out.println(da.lines[i]);
+            }
+        }catch (IOException ioe){
+        } // end run
+    }
+}
+
+class BCLooper implements Runnable {
+    public static boolean adminControlSwitch = true;
+    
+    public void run(){ // RUNning the Admin listen loop
+        System.out.println("In BC Looper thread, waiting for 2570 connections");
+        
+        int q_len = 6; /* Number of requests for OpSys to queue */
+        int port = 2570;  // Listen here for Back Channel Connections
+        Socket sock;
+        
+        try{
+            @SuppressWarnings("resource")
+            ServerSocket servsock = new ServerSocket(port, q_len);
+            while (adminControlSwitch) {
+                // wait for the next ADMIN client connection:
+                sock = servsock.accept();
+                new BCWorker (sock).start(); 
+            }
+        }catch (IOException ioe) {System.out.println(ioe);}
+    }
 }
 
 
