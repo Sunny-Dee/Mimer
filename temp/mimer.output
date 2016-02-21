@@ -1,5 +1,5 @@
 Persistent XML with the help of XStream
-First arg to Handler is: /Users/delianaescobari/Downloads/mimer-data-6.xyz
+First arg to Handler is: /Users/delianaescobari/Downloads/mimer-data.xyz
 
 <myDataArray>
   <num__lines>5</num__lines>

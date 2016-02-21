@@ -4,7 +4,9 @@ import java.util.*;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-
+/**
+ * Handles files with xyz MIME-Type files
+ */
 public class BCHandler {
     private static String XMLfileName;
     private static PrintWriter toXmlOutputFile;
@@ -116,6 +118,12 @@ public class BCHandler {
         
     }
     
+    /**
+     * Data goes full circle and it's displayed in the servers console through the back
+     * channel connection.
+     * @param sendData likely xml formatted string to write into client's back channel
+     * @param serverName either server's IP address or 'localhost'
+     */
     static void sendToBC(String sendData, String serverName) {
         Socket sock;
         BufferedReader fromServer;
@@ -128,6 +136,7 @@ public class BCHandler {
             // Will be blocking until we get ACK from server that data sent
             fromServer = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             
+            //Print the data to the server console
             toServer.println(sendData);
             toServer.println("end_of_xml");
             toServer.flush();
@@ -138,6 +147,7 @@ public class BCHandler {
             if (textFromServer != null) {
                 System.out.println(textFromServer);
             }
+            //Never forget to close a socket!
             sock.close();
         } catch (IOException x) {
             System.out.println("Socket error.");
