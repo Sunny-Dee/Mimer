@@ -1,0 +1,16 @@
+Persistent XML with the help of XStream
+First arg to Handler is: /Users/delianaescobari/Downloads/mimer-data-6.xyz
+
+<myDataArray>
+  <num__lines>5</num__lines>
+  <lines>
+    <string>One partridge in a pear tree</string>
+    <string>Two turtle doves</string>
+    <string>Three French hens</string>
+    <string>Four calling birds</string>
+    <string>Five golden rings</string>
+    <null/>
+    <null/>
+    <null/>
+  </lines>
+</myDataArray>

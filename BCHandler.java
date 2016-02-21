@@ -25,10 +25,6 @@ public class BCHandler {
         myDataArray da = new myDataArray();
         myDataArray daTest = new myDataArray();// From BCClient
         
-        //Serialize data: Convert the data array to xml
-        XStream xstream = new XStream(new DomDriver());
-        String xml = xstream.toXML(da);
-        
         //Start a file in the current directory to get it's path
         File f = new File(".");
         
@@ -37,7 +33,7 @@ public class BCHandler {
             dirRoot = f.getCanonicalPath();
         } catch (Throwable e){e.printStackTrace();}
         
-        XMLfileName = dirRoot + "temp/mimer.output";
+        XMLfileName = dirRoot + "/temp/mimer.output";
         
         try {
             //From Handler
@@ -69,10 +65,13 @@ public class BCHandler {
             da.num_lines = i - 1;
             System.out.println("i is: " + i);
             
-            
             //Open a new file with the mime.output name and extension
             xmlFile = new File(XMLfileName);
             System.out.println("filename: " + XMLfileName); //this was a check for me.
+            
+            //Serialize data: Convert the data array to xml
+            XStream xstream = new XStream(new DomDriver());
+            String xml = xstream.toXML(da);
             
             //From BCClient
             //send the message to the back channel server
