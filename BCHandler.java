@@ -2,12 +2,8 @@ import java.io.*;  // Get the Input Output libraries
 import java.net.*; // Get the Java networking libraries
 import java.util.*;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
-//helped class to store a string array of up to 8 lines
-class DataArr {
-    int num_lines = 0;
-    String[] lines = new String[8];
-}
 
 public class BCHandler {
     private static String XMLfileName;
@@ -26,11 +22,11 @@ public class BCHandler {
         //Start a counter to read the lines of data from the file
         int i = 0;
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        DataArr da = new DataArr();
-        DataArr daTest = new DataArr();// From BCClient
+        myDataArray da = new myDataArray();
+        myDataArray daTest = new myDataArray();// From BCClient
         
         //Serialize data: Convert the data array to xml
-        XStream xstream = new XStream();
+        XStream xstream = new XStream(new DomDriver());
         String xml = xstream.toXML(da);
         
         //Start a file in the current directory to get it's path
@@ -41,9 +37,10 @@ public class BCHandler {
             dirRoot = f.getCanonicalPath();
         } catch (Throwable e){e.printStackTrace();}
         
-        XMLfileName = dirRoot + "/mimer.output";
+        XMLfileName = dirRoot + "temp/mimer.output";
         
         try {
+            //From Handler
             System.out.println("Executing the java application.");
             System.out.flush();
             //Start the system properties to later add our arguments
@@ -57,21 +54,6 @@ public class BCHandler {
             
             //Start an input steam buffer to capture the data
             fromMimeDataFile = new BufferedReader(new FileReader(argOne));
-            
-            //send the message to the back channel server
-            sendToBC(xml, serverName);
-            //and print to terminal
-            System.out.println("\n\nHere is the XML version:");
-            System.out.print(xml);
-            
-            // deserialize data
-            daTest = (DataArr) xstream.fromXML(xml);
-            //print that
-            System.out.println("\n\nHere is the deserialized data: ");
-            for (i = 0; i < daTest.num_lines; i++) {
-                System.out.println(daTest.lines[i]);
-            }
-            System.out.println("\n");
             
             /*
              * Up to 8 times: read line from the file
@@ -87,9 +69,26 @@ public class BCHandler {
             da.num_lines = i - 1;
             System.out.println("i is: " + i);
             
+            
             //Open a new file with the mime.output name and extension
             xmlFile = new File(XMLfileName);
-            System.out.println("filename: " + XMLfileName);
+            System.out.println("filename: " + XMLfileName); //this was a check for me.
+            
+            //From BCClient
+            //send the message to the back channel server
+            sendToBC(xml, serverName);
+            //and print to terminal
+            System.out.println("\n\nHere is the XML version:");
+            System.out.print(xml);
+            
+            // deserialize data
+            daTest = (myDataArray) xstream.fromXML(xml);
+            //print that as well
+            System.out.println("\n\nHere is the deserialized data: ");
+            for (i = 0; i < daTest.num_lines; i++) {
+                System.out.println(daTest.lines[i]);
+            }
+            System.out.println("\n");
             
             //Throw an exception if that file already exists and
             //if trying to delete it fails...
@@ -107,8 +106,8 @@ public class BCHandler {
                 // Should be the file name.
             } else {
                 toXmlOutputFile = new PrintWriter(new BufferedWriter(new FileWriter(XMLfileName)));
+                toXmlOutputFile.println("Persistent XML with the help of XStream");
                 toXmlOutputFile.println("First arg to Handler is: " + argOne + "\n");
-                toXmlOutputFile.println("<This where the persistent XML will go>");
                 toXmlOutputFile.println(xml);
                 toXmlOutputFile.close();
             }

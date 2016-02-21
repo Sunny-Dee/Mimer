@@ -38,9 +38,9 @@ public class MyWebServer {
         int port = 2540;
         Socket sock;
         
-        BCLooper AL = new BCLooper(); // create a DIFFERENT thread for Back Door Channel
-        Thread t = new Thread(AL);
-        t.start();  // ...and start it, waiting for Back Channel input
+        		BCLooper AL = new BCLooper(); // create a DIFFERENT thread for Back Door Channel
+        		Thread t = new Thread(AL);
+        		t.start();  // ...and start it, waiting for Back Channel input
         
         /*This guy is going to start the connection to the port
          * then it will pass on the request to the worker
@@ -91,7 +91,7 @@ class WebWorker extends Thread {
         //Get I/O streams in/out from the socket
         DataOutputStream out = null;
         BufferedReader in = null;
-        
+        PrintStream sendClient = null;//added this because DataOutput not writing to file.
         
         try{
             //input to the socket
@@ -99,6 +99,7 @@ class WebWorker extends Thread {
             (new InputStreamReader(sock.getInputStream()));
             //output from the socket
             out = new DataOutputStream(sock.getOutputStream());
+            sendClient = new PrintStream(sock.getOutputStream());
             
             try{
                 dirRoot = f.getCanonicalPath();
@@ -122,11 +123,8 @@ class WebWorker extends Thread {
                     if (requestElements.get(1).contains("addnums.fake-cgi"))
                         addNumms(requestElements.get(1), out);
                     else if (requestElements.get(1).endsWith(".xyz")){
-                        //    					String header = createHeader(0, requestElements.get(1));
-                        //    					out.write(header.getBytes());
-                        //    					out.write(request.getBytes());
-                        //    					System.out.println(header);
-                        writeXYZ(requestedFile, out);
+                        
+                        writeXYZ(requestedFile, out, sendClient);
                     }
                     else if (requestedFile.isDirectory())
                         writeDir(requestedFile, out);
@@ -169,13 +167,12 @@ class WebWorker extends Thread {
     }
     
     
-    public void writeXYZ(File requestedFile, OutputStream out){
-        //		try{
-        //			InputStream file = new FileInputStream(requestedFile);
+    public void writeXYZ(File requestedFile, OutputStream out, PrintStream sendClient){
+        
         String header = requestElements.get(2) +
         " 200 OK\r\n" +
         "Content-Legth: "+
-        requestElements.get(1).length() +
+        requestedFile.length() +
         "\r\n" +
         "Content-Type: " +
         guessContentType(".xyz") +
@@ -186,16 +183,18 @@ class WebWorker extends Thread {
         System.out.println(header);
         
         try {
-            //send the header to the client/browser
             out.write(header.getBytes());
-            
-            //write the file to the output stream
-            //		        sendFile(file, out);
-            
-            // Grandma always said: remember to close your files!
-            //		        file.close();
-        } catch (IOException io) {System.out.println(io);}
-        //		} catch (FileNotFoundException e) {e.printStackTrace();}
+            BufferedReader readFile = new BufferedReader(new FileReader(requestedFile.getName()));					//open appropriate file
+            String line = null;
+            while((line = readFile.readLine()) != null){
+                System.out.println(line);
+                sendClient.println(line);													//send content of file to client line by line
+            }
+            readFile.close();
+        } catch (Exception e) {
+            System.out.println("File is not in this directory");
+            sendClient.println("File is not in this directory");
+        }
     }
     
     
@@ -507,7 +506,8 @@ class BCWorker extends Thread {
         try{
             in =  new BufferedReader(new InputStreamReader(sock.getInputStream()));
             out = new PrintStream(sock.getOutputStream()); // to send ack back to client
-            i = 0; xml = "";
+            i = 0; 
+            xml = "";
             while(true){
                 temp = in.readLine();
                 if (temp.indexOf("end_of_xml") > -1) break;
