@@ -1,0 +1,90 @@
+Server Log
+
+/**************************************************
+Response for calling mimer-data.xyz from server page.
+****************************************************/
+
+$ ./rx.sh 
+In BC Looper thread, waiting for 2570 connections
+World's Greatest Web Sever 
+Starting up, listening at port 2540.
+
+Fulfilling client request
+HTTP/1.1 200 OK
+Content-Length: 101
+Content-Type: application/xyz
+Date: Sun Feb 21 02:18:40 CST 2016
+
+
+One partridge in a pear tree
+Two turtle doves
+Three French hens
+Four calling birds
+Five golden rings
+Called BC worker.
+
+The XML marshaled data:
+<myDataArray>
+  <num__lines>5</num__lines>
+  <lines>
+    <string>One partridge in a pear tree</string>
+    <string>Two turtle doves</string>
+    <string>Three French hens</string>
+    <string>Four calling birds</string>
+    <string>Five golden rings</string>
+    <null/>
+    <null/>
+    <null/>
+  </lines>
+</myDataArray>
+
+Here is the restored data: 
+One partridge in a pear tree
+Two turtle doves
+Three French hens
+Four calling birds
+Five golden rings
+
+/*************************************************************************
+Script automatically opens a new Terminal window and types the following
+*************************************************************************/
+
+We are now in a shim called from the Web Browser
+Arg one is: /Users/delianaescobari/Downloads/mimer-data-1.xyz
+Executing the java application.
+First var is: /Users/delianaescobari/Downloads/mimer-data-1.xyz
+
+Data is: One partridge in a pear tree
+Data is: Two turtle doves
+Data is: Three French hens
+Data is: Four calling birds
+Data is: Five golden rings
+i is: 6
+filename: /Users/delianaescobari/Documents/Mimer/temp/mimer.output
+Blocking on acknowledgment from Server... 
+Acknowledging Back Channel Data Receipt
+
+
+Here is the XML version:
+<myDataArray>
+  <num__lines>5</num__lines>
+  <lines>
+    <string>One partridge in a pear tree</string>
+    <string>Two turtle doves</string>
+    <string>Three French hens</string>
+    <string>Four calling birds</string>
+    <string>Five golden rings</string>
+    <null/>
+    <null/>
+    <null/>
+  </lines>
+</myDataArray>
+
+Here is the deserialized data: 
+One partridge in a pear tree
+Two turtle doves
+Three French hens
+Four calling birds
+Five golden rings
+
+

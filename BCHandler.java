@@ -4,9 +4,20 @@ import java.util.*;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
+
 /**
- * Handles files with xyz MIME-Type files
+ * Name: Deliana Escobari Date: Saturday February 20th, 2016 Java version used:
+ * 1.8 Compile with script: jcbchandler.sh
+ *
+ * How to run this program: You don't need to! Our own Mime-reader.app calls it 
+ * from the browser for us.
+ *
+ * Files needed to run this program. myDataArray.java (compiles within the same
+ * script as this program)
+ *
+ * Notes: Handles files with application/xyz MIME-Type. 
  */
+
 public class BCHandler {
     private static String XMLfileName;
     private static PrintWriter toXmlOutputFile;
@@ -143,7 +154,9 @@ public class BCHandler {
             // Read two or three lines of response from the server,
             // and block while synchronously waiting:
             System.out.println("Blocking on acknowledgment from Server... ");
+            //Store data sent from server in a string variable
             textFromServer = fromServer.readLine();
+            //print it out to the console.
             if (textFromServer != null) {
                 System.out.println(textFromServer);
             }
